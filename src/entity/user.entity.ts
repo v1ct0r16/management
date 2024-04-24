@@ -26,4 +26,5 @@ export class User extends Base {
 
   @Column({ default: true })
   isActive: boolean;
+  role: any;
 }
