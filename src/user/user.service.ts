@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, Req, Res, } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Req, Res, UnauthorizedException, } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import { User } from 'src/entity/user.entity';
@@ -6,9 +6,12 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { LoginDto } from 'src/dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Request, Response} from 'express'
+import { Request, Response, response} from 'express'
 @Injectable()
 export class UserService {
+  findAll() {
+      throw new Error('Method not implemented.');
+  }
   constructor(@InjectRepository(User)private userRepo:Repository<User>, private readonly jwtService:JwtService){}
   async SignUp(payload: CreateUserDto) {
     payload.email = payload.email.toLowerCase();
@@ -57,6 +60,38 @@ export class UserService {
 
 
   }
+
+  async user(headers:any) :Promise<any>{
+    const authorizationHeader = headers.authorization;
+    if (authorizationHeader) {
+      const token = authorizationHeader.replace('Bearer', '');
+      const secret = process.env.JWT_SECRET;
+      try {
+        const decoded = this.jwtService.verify(token);
+        let id = decoded["id"];
+        let user = await this.userRepo.findOneBy({ id });
+
+        return {id: id, name: user.username, email:user.email, role:user.role};
+      } catch(error) {
+        throw new UnauthorizedException('invalid token');
+      }
+    } else {
+      throw new UnauthorizedException( 'Invalid or missing Bearer Token')
+    }
+  }
+
+  async findEmail(email: string){
+    const user = await this.userRepo.findOneBy({email: email});
+   
+  }
     
+  async logout (@Req()req:Request, @Res()res:Response) {
+    const clearCookie = res.send('user successfully logout')
+
+    return {
+      clearCookie,
+      response
+    }
+  }
 
 }

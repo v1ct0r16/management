@@ -6,10 +6,7 @@ import { userRole } from 'src/enum/role.enum';
 export class User extends Base {
 
   @Column()
-  firstName: string;
-
-  @Column()
-  lastName: string;
+  username: string;
 
   @Column()
   password: string;
