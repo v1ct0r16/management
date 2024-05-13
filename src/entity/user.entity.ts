@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Base } from './base.entity';
 import { userRole } from 'src/enum/role.enum';
 
@@ -20,8 +20,9 @@ export class User extends Base {
     default: userRole.member
   })
   
+role: userRole
 
-  @Column({ default: true })
-  isActive: boolean;
-  role: any;
+  @OneToMany(()=>Product, (product)=> product.user,
+{eager:true, onDelete: 'CASCADE'})
+  product: Product []
 }
